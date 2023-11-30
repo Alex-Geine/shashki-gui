@@ -217,3 +217,285 @@ BoardState playAutomatic(BoardState initial) {
 	std::cout << "The computer has moved.\n";
 	return initial;
 }
+
+BoardState playNeiron(BoardState initial, Neiron* neiro) {
+
+	//DEBUG
+	//if(initial.color() == Role::White)
+	//	cout << "step white ";
+
+
+	//генерируем доски с ходами
+	std::vector<std::vector<Cell>> actions = explore(initial);
+	vector<BoardState> boards, twoStepsBoards;
+	for (int i = 0; i < actions.size(); i++) {
+		boards.push_back(initial);
+		BoardState::apply(boards[i], actions[i]);
+	}
+
+	//DEBUG
+	//if ((initial.color() == Role::White) && (actions.empty()))
+	//	cout << "actions empty ";
+
+	//генерируем доски на два хода вперед
+	for (int i = 0; i < boards.size(); i++) {
+		twoStepsBoards.push_back(boards[i]);
+
+		//DEBUG
+
+	//	cout << "opponent step ";
+
+		//смотрим три хода противника и пять своих
+		for (int j = 0; j < 3; j++) {
+			if (!twoStepsBoards[i].lost()) {
+				BoardState buf = twoStepsBoards[i];
+				//ход за противника
+				twoStepsBoards[i] = checkNeiron(twoStepsBoards[i], neiro);
+				if (twoStepsBoards[i].lost()) {
+					//	cout << "lost ";
+					if (j == 0)
+						twoStepsBoards[i] = buf;
+					j = 3;	//выход из цикла
+				}
+
+				else {
+					//	cout << "my step" << endl;
+						//ход за себя
+					twoStepsBoards[i] = checkNeiron(twoStepsBoards[i], neiro);
+				}
+			}
+		}
+	}
+
+
+
+	//выбираем нужную доску неиросетью
+	double max = -10;
+	int id = 0;
+
+	for (int i = 0; i < boards.size(); i++) {
+		double score = neiro->Work(getBoard(twoStepsBoards[i], twoStepsBoards[i].color()));
+		if (score > max) {
+			id = i;
+			max = score;
+		}
+	}
+
+	return boards[id];
+}
+
+//для тренеровки с предсказанием 3х своих и 2х чужих
+BoardState playNeironTrain(BoardState initial, Neiron* neiro) {
+
+	//DEBUG
+	//if(initial.color() == Role::White)
+	//	cout << "step white ";
+
+
+	//генерируем доски с ходами
+	std::vector<std::vector<Cell>> actions = explore(initial);
+	vector<BoardState> boards, twoStepsBoards;
+	for (int i = 0; i < actions.size(); i++) {
+		boards.push_back(initial);
+		BoardState::apply(boards[i], actions[i]);
+	}
+
+	//DEBUG
+	//if ((initial.color() == Role::White) && (actions.empty()))
+	//	cout << "actions empty ";
+
+	//генерируем доски на два хода вперед
+	for (int i = 0; i < boards.size(); i++) {
+		twoStepsBoards.push_back(boards[i]);
+
+		//DEBUG
+
+	//	cout << "opponent step ";
+
+		//смотрим два хода противника и три своих
+		for (int j = 0; j < 2; j++) {
+			if (!twoStepsBoards[i].lost()) {
+				BoardState buf = twoStepsBoards[i];
+				//ход за противника
+				twoStepsBoards[i] = checkNeiron(twoStepsBoards[i], neiro);
+				if (twoStepsBoards[i].lost()) {
+					//	cout << "lost ";
+					if (j == 0)
+						twoStepsBoards[i] = buf;
+					j = 3;	//выход из цикла
+				}
+
+				else {
+					//	cout << "my step" << endl;
+						//ход за себя
+					twoStepsBoards[i] = checkNeiron(twoStepsBoards[i], neiro);
+				}
+			}
+		}
+	}
+
+
+
+	//выбираем нужную доску неиросетью
+	double max = -10;
+	int id = 0;
+
+	for (int i = 0; i < boards.size(); i++) {
+		double score = neiro->Work(getBoard(twoStepsBoards[i], twoStepsBoards[i].color()));
+		if (score > max) {
+			id = i;
+			max = score;
+		}
+	}
+
+	return boards[id];
+}
+
+//функция, которая оценивает ход 
+BoardState checkNeiron(BoardState initial, Neiron* neiro) {
+	//cout << " check desk" << endl;
+	//генерируем доски с ходами
+	std::vector<std::vector<Cell>> actions = explore(initial);
+	//cout << " explore";
+	vector<BoardState> boards;
+	for (int i = 0; i < actions.size(); i++) {
+		boards.push_back(initial);
+		BoardState::apply(boards[i], actions[i]);
+	}
+	//cout << " add boards size: " << boards.size();
+	//выбираем нужную доску неиросетью
+	double max = -10;
+	int id = 0;
+
+	for (int i = 0; i < boards.size(); i++) {
+		//cout << " idb: " << i;
+		//if (!neiro) {
+		//	cout << "Neiron is dead!!";
+		//}
+
+		double score = neiro->Work(getBoard(boards[i], boards[i].color()));
+		//neiro->PrintInfo();
+		bool scoreFault = isnan(score);
+		if (scoreFault)
+			neiro->PrintInfo();
+
+		//cout << " score " << score;
+		if (score > max) {
+			id = i;
+			max = score;
+		}
+	}
+
+
+	if (!boards.empty()) {
+		return boards[id];
+	}
+
+	else {
+		//cout << "empty boards for explore" << endl;
+		return initial;
+	}
+
+}
+
+double* getBoard(BoardState board, Role role) {
+	double* res = new double[32];
+	int id = 0;
+	Position p = board.position();
+
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			Cell cell(i, j);
+			if (cell.valid()) {
+				if (p.ghost(cell)) {
+					res[id] = 0;
+					id++;
+				}
+				else if (p.color(cell) == Role::None) {
+					res[id] = 0;
+					id++;
+				}
+				else {
+					res[id] = p.color(cell) == role.opposite() ? 1 : -1;
+					if (p.king(cell))
+						res[id] *= 2;
+					id++;
+				}
+			}
+		}
+	}
+	return res;
+}
+
+//функция, проводящая игру между неиросетями
+void NeiroVsNeiro(Neiron* white, Neiron* black) {
+	PlayerFunction players[2];
+	players[Role::White] = playNeironTrain;
+	players[Role::Black] = playNeironTrain;
+	BoardState board = BoardState::initialBoard();
+
+	//переменные для отслеживания ничьи
+	double scoreWhite = 0;
+	double scoreBlack = 0;
+	double s1 = 0, s2 = 0;
+	int noChanges = 0;
+
+	while (!board.lost()) {
+		if (board.color() == Role::None)
+			return;
+
+		if (board.color() == Role::White) {
+			board = players[board.color()](board, white);
+			//printBoard(board);
+			if (board.color() == Role::None)
+				return;
+		}
+
+		else if (board.color() == Role::Black) {
+			//	cout << "step black" << endl;
+			board = players[board.color()](board, black);
+			//printBoard(board);
+			if (board.color() == Role::None)
+				return;
+		}
+
+		//проверка на ничью
+
+		_getScore(s1, s2, board);
+		//состояние не изменилось
+		if ((s1 == scoreWhite) && (s2 == scoreBlack))
+			noChanges++;
+		else {
+			scoreWhite = s1;
+			scoreBlack = s2;
+			noChanges = 0;
+		}
+		//cout << "scoreWhite: " << scoreWhite << "ScoreBlack: " << scoreBlack << "noChanges: " << noChanges << endl;
+		if (noChanges >= 20)
+			return;
+	}
+	board.color() == Role::Black ?
+		(white->score += 1, black->score -= 2, white->isWin = true, black->isWin = false) :
+		(black->score += 1, white->score -= 2, white->isWin = false, black->isWin = true);
+	return;
+}
+
+//функция, которая возвращает ценность обоих игроков
+void _getScore(double& s1, double& s2, BoardState initial) {
+	Position p = initial.position();
+	s1 = 0; s2 = 0;
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			Cell cell(i, j);
+			if (cell.valid()) {
+				double buf = p.color(cell) == Role::White ? 1 : -1;
+				if (p.king(cell))
+					buf *= 2;
+				if (buf > 0)
+					s1 += buf;
+				else
+					s2 += buf;
+			}
+		}
+	}
+}

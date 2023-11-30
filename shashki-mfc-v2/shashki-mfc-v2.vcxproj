@@ -190,7 +190,9 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="minimax.h" />
+    <ClInclude Include="Neiron.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Population.h" />
     <ClInclude Include="position.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="role.h" />
@@ -206,12 +208,14 @@
     <ClCompile Include="direction.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="minimax.cpp" />
+    <ClCompile Include="Neiron.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Population.cpp" />
     <ClCompile Include="position.cpp" />
     <ClCompile Include="role.cpp" />
     <ClCompile Include="segment.cpp" />

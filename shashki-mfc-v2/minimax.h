@@ -6,5 +6,6 @@
 #include <vector>
 
 std::vector<Cell> minimax(BoardState board);
+std::vector<std::vector<Cell>> explore(const BoardState& board);
 
 #endif

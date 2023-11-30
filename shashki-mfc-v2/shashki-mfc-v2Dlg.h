@@ -4,6 +4,7 @@
 
 #pragma once
 #include "Desk.h"
+#include "Population.h"
 
 
 // Диалоговое окно Cshashkimfcv2Dlg
@@ -36,4 +37,7 @@ public:
 	Desk* desk;
 	afx_msg void OnBnClickedOk();
 	CComboBox Color;
+	Population* p;
+	double count;
+	afx_msg void OnBnClickedOk2();
 };

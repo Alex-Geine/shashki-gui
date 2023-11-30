@@ -4,6 +4,7 @@
 #include <gdiplus.h>
 #include "Game.h"
 
+
 using namespace Gdiplus;
 using namespace std;
 
@@ -33,6 +34,9 @@ public:
 	Role human;
 	Cell curCell;
 
+	//Neiron
+	Neiron* neiro;
+	
 
 
 	double** Board = NULL;

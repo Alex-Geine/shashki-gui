@@ -55,6 +55,7 @@ END_MESSAGE_MAP()
 
 Cshashkimfcv2Dlg::Cshashkimfcv2Dlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SHASHKIMFCV2_DIALOG, pParent)
+	, count(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -63,6 +64,7 @@ void Cshashkimfcv2Dlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1, Color);
+	DDX_Text(pDX, IDC_EDIT1, count);
 }
 
 BEGIN_MESSAGE_MAP(Cshashkimfcv2Dlg, CDialogEx)
@@ -70,6 +72,7 @@ BEGIN_MESSAGE_MAP(Cshashkimfcv2Dlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDOK, &Cshashkimfcv2Dlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDOK2, &Cshashkimfcv2Dlg::OnBnClickedOk2)
 END_MESSAGE_MAP()
 
 
@@ -111,6 +114,8 @@ BOOL Cshashkimfcv2Dlg::OnInitDialog()
 	//инициализация меню
 	Color.AddString(L"Белые");
 	Color.AddString(L"Черные");
+
+	p = new Population(30);
 
 	return TRUE;  // возврат значения TRUE, если фокус не передан элементу управления
 }
@@ -169,12 +174,12 @@ HCURSOR Cshashkimfcv2Dlg::OnQueryDragIcon()
 void Cshashkimfcv2Dlg::OnBnClickedOk()
 {
 	UpdateData();
-	
-
 
 	int id = Color.GetCurSel();
 	CString col; 
 	Color.GetLBText(id, col);
+	
+	desk->neiro = p->GetBest();
 	if (col == L"Белые") {
 		desk->setPlayers(1);
 	}
@@ -185,5 +190,20 @@ void Cshashkimfcv2Dlg::OnBnClickedOk()
 		MessageBox(L"Выберете цвет!", L"Выберете цвет!", NULL);
 		return;
 	}
+
+	
 	desk->ShowWindow(1);	
+}
+
+//Кнопка, запускающая тренеровку
+void Cshashkimfcv2Dlg::OnBnClickedOk2()
+{
+	MessageBox(L"Тренеровка начата!");
+
+	UpdateData();
+	for (int i = 0; i < count; i++) {		
+		p->Selection();
+		p->CreateNew();
+	}
+	MessageBox(L"Тренеровка завершена!");	
 }

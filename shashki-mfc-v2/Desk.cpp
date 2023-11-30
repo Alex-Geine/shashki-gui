@@ -13,8 +13,8 @@ void Desk::setPlayers(int role) {
 		human = Role::Black;	
 
 	board = BoardState::initialBoard();
-	if (human = Role::Black)
-		board = playAutomatic(board);
+	if (human == Role::Black)
+		board = playNeiron(board, neiro);
 }
 // Диалоговое окно Desk
 
@@ -25,7 +25,6 @@ Desk::Desk(CWnd* pParent /*=nullptr*/)
 {
 	GdiplusStartupInput si;
 	GdiplusStartup(&token, &si, NULL);
-	
 }
 
 Desk::~Desk()
@@ -331,7 +330,8 @@ void Desk::HumanHungry() {
 	board.control(Cell());	//эта штука хз что делает
 
 	//ход за противника
-	board = playAutomatic(board);
+	//board = playAutomatic(board);
+	board = playNeiron(board, neiro);
 }
 
 //ход игрока, когда не надо есть
@@ -382,7 +382,8 @@ void Desk::HumanQuiet() {
 	board.control(Cell());	//эта штука хз что делает
 
 	//ход за противника
-	board = playAutomatic(board);
+	//board = playAutomatic(board);
+	board = playNeiron(board, neiro);
 }
 
 //ход игрока, когда не надо есть дамкой
@@ -425,8 +426,8 @@ void Desk::HumanQuietKing() {
 	board.control(Cell());	//эта штука хз что делает
 
 	//ход за противника
-	board = playAutomatic(board);
-
+	//board = playAutomatic(board);
+	board = playNeiron(board, neiro);
 }
 
 //ход игрока, когда надо есть дамкой
@@ -501,5 +502,6 @@ void Desk::HumanHungryKing() {
 	board.control(Cell());	//эта штука хз что делает
 
 	//ход за противника
-	board = playAutomatic(board);
+	//board = playAutomatic(board);
+	board = playNeiron(board, neiro);
 }
