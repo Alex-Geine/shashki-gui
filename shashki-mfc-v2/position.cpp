@@ -121,3 +121,29 @@ bool Position::captures(Cell thru, Direction direction, Role color, bool king) c
 		case Capture: return true;
 		}
 }
+
+//конструкор позиции доски из массива даблов
+Position::Position(double** cells) {
+	Stone stones[32];
+	int id = 0;
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 4; j++) {
+			Role role;
+			bool k = false;
+			if (cells[i][j] > 0)
+				role = Role::White;
+			else if (cells[i][j] < 0)
+				role = Role::Black;
+			else
+				role = Role::None;
+			if ((cells[i][j] == 2) || (cells[i][j] == -2))
+				k = true;
+
+			Stone st(role, k);
+			stones[id] = st;
+			id++;
+		}
+	}
+
+	*this = Position(stones);
+}

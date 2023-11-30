@@ -9,22 +9,13 @@
 void Desk::setPlayers(int role) {	
 	if (role == 1) 
 		human = Role::White;	
-	
 	else if (role == 2) 
 		human = Role::Black;	
 
 	board = BoardState::initialBoard();
+	if (human = Role::Black)
+		board = playAutomatic(board);
 }
-
-//делает ход человека
-bool Desk::HumanStep(string Step) {
-	BoardState curboard = playHuman(board, Step);
-	if (curboard == board) {
-
-	}
-	return true;
-}
-
 // Диалоговое окно Desk
 
 IMPLEMENT_DYNAMIC(Desk, CDialogEx)
@@ -235,56 +226,20 @@ void Desk::OnLButtonUp(UINT nFlags, CPoint point)
 
 	//если уже выбрана шашка 
 	if (Click && (Board[colStep][lineStep] == 0) && (!((colStep + lineStep) % 2))) {
-		//если ходит шашка
-		if ((!king) && (abs(col - colStep) == 1) && (abs(line - lineStep) == 1)) {
-			int dcol = col - colStep;
-			int dline = line - lineStep;
 
-			//if (color == Role::White) {
-			//	if (word == "left") return Direction::LeftForward;
-			//	if (word == "right") return Direction::RightForward;
-			//	if (word == "left-back") return Direction::LeftBackward;
-			//	if (word == "right-back") return Direction::RightBackward;
-			//}
-			//if (color == Role::Black) {
-			//	if (word == "left") return Direction::LeftBackward;
-			//	if (word == "right") return Direction::RightBackward;
-			//	if (word == "left-back") return Direction::LeftForward;
-			//	if (word == "right-back") return Direction::RightForward;
-			//}
+		//если ходит шашка и не нужно есть
+		if ((!king) && (abs(col - colStep) == 1) && (abs(line - lineStep) == 1) && board.quiet())
+			HumanQuiet();
 
-			//направление
-			Direction d;
+		else if ((!king) && (abs(col - colStep) == 2) && (abs(line - lineStep) == 2) && (!board.quiet()))
+			HumanHungry();
 
-			//выбор нарпавления для белых 
-			if ((dcol < 0) && (dline < 0) && human == Role::White) {
-				MessageBox(L"Right");
-				d = Direction::RightForward;
-				
-			}
-			else if ((dcol > 0) && (dline < 0) && human == Role::White) {
-				MessageBox(L"Left");
-				d = Direction::LeftForward;
-			}
-			
-			//выбор нарпавления для белых 
-			if ((dcol < 0) && (dline > 0) && human == Role::Black) {
-				MessageBox(L"Right");
-				d = Direction::RightBackward;
-			}
-			else if ((dcol > 0) && (dline > 0) && human == Role::Black) {
-				MessageBox(L"Left");
-				d = Direction::LeftBackward;
-			}
+		else if (king && board.quiet() && (abs(col - colStep) - abs(line - lineStep) == 0))
+			HumanQuietKing();
 
-			//сам ход
-			board.control(curCell);
-			board.control(board.place().neighbour(d));
-			board.control(Cell());	//эта штука хз что делает
-
-			//ход за противника
-			board = playAutomatic(board);
-		}
+		else if (king && !board.quiet() && (abs(col - colStep) - abs(line - lineStep) == 0))
+			HumanHungryKing();		
+		
 		Click = false;
 	}
 
@@ -305,4 +260,246 @@ void Desk::OnLButtonUp(UINT nFlags, CPoint point)
 	Invalidate(false);
 
 	CDialogEx::OnLButtonUp(nFlags, point);
+}
+
+
+//ход игрока, когда надо есть
+void Desk::HumanHungry() {
+	int dcol = col - colStep;
+	int dline = line - lineStep;
+
+	//if (color == Role::White) {
+	//	if (word == "left") return Direction::LeftForward;
+	//	if (word == "right") return Direction::RightForward;
+	//	if (word == "left-back") return Direction::LeftBackward;
+	//	if (word == "right-back") return Direction::RightBackward;
+	//}
+	//if (color == Role::Black) {
+	//	if (word == "left") return Direction::LeftBackward;
+	//	if (word == "right") return Direction::RightBackward;
+	//	if (word == "left-back") return Direction::LeftForward;
+	//	if (word == "right-back") return Direction::RightForward;
+	//}
+
+	//направление
+	Direction d;
+
+	//выбор нарпавления для белых 
+	if ((dcol < 0) && (dline < 0) && human == Role::White) {
+		//MessageBox(L"Right");
+		d = Direction::RightForward;
+	}
+	else if ((dcol > 0) && (dline < 0) && human == Role::White) {
+		//MessageBox(L"Left");
+		d = Direction::LeftForward;
+	}
+	else if ((dcol > 0) && (dline > 0) && human == Role::White) {
+		//MessageBox(L"Left-Back");
+		d = Direction::LeftBackward;
+	}
+	else if ((dcol < 0) && (dline > 0) && human == Role::White) {
+		//MessageBox(L"Right-Back");
+		d = Direction::RightBackward;
+	}
+
+	//выбор нарпавления для черных
+	if ((dcol < 0) && (dline > 0) && human == Role::Black) {
+		//MessageBox(L"Right");
+		d = Direction::RightBackward;
+	}
+	else if ((dcol > 0) && (dline > 0) && human == Role::Black) {
+		//MessageBox(L"Left");
+		d = Direction::LeftBackward;
+	}
+	else if ((dcol < 0) && (dline < 0) && human == Role::Black) {
+		//MessageBox(L"Right-back");
+		d = Direction::LeftForward;
+	}
+	else if ((dcol > 0) && (dline < 0) && human == Role::Black) {
+		//MessageBox(L"Left-back");
+		d = Direction::LeftForward;
+	}
+	//сам ход
+	board.control(curCell);
+	board.control(board.place().neighbour(d));
+	
+	while (!board.capture())	//посмотри, что делает
+		board.control(board.place().neighbour(d));
+
+	board.control(board.place().neighbour(d));
+	
+	board.control(Cell());	//эта штука хз что делает
+
+	//ход за противника
+	board = playAutomatic(board);
+}
+
+//ход игрока, когда не надо есть
+void Desk::HumanQuiet() {
+	int dcol = col - colStep;
+	int dline = line - lineStep;
+
+	//if (color == Role::White) {
+	//	if (word == "left") return Direction::LeftForward;
+	//	if (word == "right") return Direction::RightForward;
+	//	if (word == "left-back") return Direction::LeftBackward;
+	//	if (word == "right-back") return Direction::RightBackward;
+	//}
+	//if (color == Role::Black) {
+	//	if (word == "left") return Direction::LeftBackward;
+	//	if (word == "right") return Direction::RightBackward;
+	//	if (word == "left-back") return Direction::LeftForward;
+	//	if (word == "right-back") return Direction::RightForward;
+	//}
+
+	//направление
+	Direction d;
+
+	//выбор нарпавления для белых 
+	if ((dcol < 0) && (dline < 0) && human == Role::White) {
+		//MessageBox(L"Right");
+		d = Direction::RightForward;
+
+	}
+	else if ((dcol > 0) && (dline < 0) && human == Role::White) {
+		//MessageBox(L"Left");
+		d = Direction::LeftForward;
+	}
+
+	//выбор нарпавления для белых 
+	if ((dcol < 0) && (dline > 0) && human == Role::Black) {
+		//MessageBox(L"Right");
+		d = Direction::RightBackward;
+	}
+	else if ((dcol > 0) && (dline > 0) && human == Role::Black) {
+		//MessageBox(L"Left");
+		d = Direction::LeftBackward;
+	}
+
+	//сам ход
+	board.control(curCell);
+	board.control(board.place().neighbour(d));
+	board.control(Cell());	//эта штука хз что делает
+
+	//ход за противника
+	board = playAutomatic(board);
+}
+
+//ход игрока, когда не надо есть дамкой
+void Desk::HumanQuietKing() {
+	int dcol = col - colStep;
+	int dline = line - lineStep;
+	
+
+	//направление
+	Direction d;
+
+	//выбор нарпавления для белых 
+	if ((dcol < 0) && (dline < 0) && human == Role::White) {
+		//MessageBox(L"Right");
+		d = Direction::RightForward;
+
+	}
+	else if ((dcol > 0) && (dline < 0) && human == Role::White) {
+		//MessageBox(L"Left");
+		d = Direction::LeftForward;
+	}
+
+	//выбор нарпавления для белых 
+	if ((dcol < 0) && (dline > 0) && human == Role::Black) {
+		//MessageBox(L"Right");
+		d = Direction::RightBackward;
+	}
+	else if ((dcol > 0) && (dline > 0) && human == Role::Black) {
+		//MessageBox(L"Left");
+		d = Direction::LeftBackward;
+	}
+
+	//сам ход
+	board.control(curCell);
+	while (dline) {//в этом цикле ходит по одной клетке пока не дойдет
+		board.control(board.place().neighbour(d));
+		dline--;
+	}
+	
+	board.control(Cell());	//эта штука хз что делает
+
+	//ход за противника
+	board = playAutomatic(board);
+
+}
+
+//ход игрока, когда надо есть дамкой
+void Desk::HumanHungryKing() {
+	int dcol = col - colStep;
+	int dline = line - lineStep;
+
+	//if (color == Role::White) {
+	//	if (word == "left") return Direction::LeftForward;
+	//	if (word == "right") return Direction::RightForward;
+	//	if (word == "left-back") return Direction::LeftBackward;
+	//	if (word == "right-back") return Direction::RightBackward;
+	//}
+	//if (color == Role::Black) {
+	//	if (word == "left") return Direction::LeftBackward;
+	//	if (word == "right") return Direction::RightBackward;
+	//	if (word == "left-back") return Direction::LeftForward;
+	//	if (word == "right-back") return Direction::RightForward;
+	//}
+
+	//направление
+	Direction d;
+
+	//выбор нарпавления для белых 
+	if ((dcol < 0) && (dline < 0) && human == Role::White) {
+		//MessageBox(L"Right");
+		d = Direction::RightForward;
+	}
+	else if ((dcol > 0) && (dline < 0) && human == Role::White) {
+		//MessageBox(L"Left");
+		d = Direction::LeftForward;
+	}
+	else if ((dcol > 0) && (dline > 0) && human == Role::White) {
+		//MessageBox(L"Left-Back");
+		d = Direction::LeftBackward;
+	}
+	else if ((dcol < 0) && (dline > 0) && human == Role::White) {
+		//MessageBox(L"Right-Back");
+		d = Direction::RightBackward;
+	}
+
+	//выбор нарпавления для черных
+	if ((dcol < 0) && (dline > 0) && human == Role::Black) {
+		//MessageBox(L"Right");
+		d = Direction::RightBackward;
+	}
+	else if ((dcol > 0) && (dline > 0) && human == Role::Black) {
+		//MessageBox(L"Left");
+		d = Direction::LeftBackward;
+	}
+	else if ((dcol < 0) && (dline < 0) && human == Role::Black) {
+		//MessageBox(L"Right-back");
+		d = Direction::LeftForward;
+	}
+	else if ((dcol > 0) && (dline < 0) && human == Role::Black) {
+		//MessageBox(L"Left-back");
+		d = Direction::LeftForward;
+	}
+	//сам ход
+	board.control(curCell);
+	board.control(board.place().neighbour(d));
+
+	while (!board.capture())	//посмотри, что делает
+		board.control(board.place().neighbour(d));
+	dline--;
+
+	while (dline) {//в этом цикле ходит по одной клетке пока не дойдет
+		board.control(board.place().neighbour(d));
+		dline--;
+	}
+
+	board.control(Cell());	//эта штука хз что делает
+
+	//ход за противника
+	board = playAutomatic(board);
 }

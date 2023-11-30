@@ -16,6 +16,8 @@ public:
 	};
 	enum Motion {Block = 0, Slow, Capture};
 	Position (Stone *cells = nullptr);
+	//создание позиции доски с помощью массива данных
+	Position(double** cells);
 
 	Role color (Cell cell) const;
 	bool king (Cell cell) const;

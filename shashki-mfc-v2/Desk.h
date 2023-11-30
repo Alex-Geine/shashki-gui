@@ -84,8 +84,19 @@ public:
 	//устанавливает игроков
 	void setPlayers(int role);
 
-	//делает ход человека
-	bool HumanStep(string Step);
+	
+
+	//ход игрока, когда не надо есть
+	void HumanQuiet();
+
+	//ход игрока, когда надо есть
+	void HumanHungry();
+
+	//ход игрока, когда не надо есть дамкой
+	void HumanQuietKing();
+
+	//ход игрока, когда надо есть дамкой
+	void HumanHungryKing();
 
 	PlayerFunction players[2];
 	BoardState board;
