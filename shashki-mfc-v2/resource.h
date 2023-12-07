@@ -11,6 +11,7 @@
 #define IDD_DIALOG1                     129
 #define IDC_COMBO1                      1000
 #define IDC_EDIT1                       1001
+#define IDC_EDIT2                       1002
 
 // Next default values for new objects
 // 

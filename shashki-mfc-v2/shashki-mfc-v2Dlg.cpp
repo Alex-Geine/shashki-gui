@@ -56,6 +56,7 @@ END_MESSAGE_MAP()
 Cshashkimfcv2Dlg::Cshashkimfcv2Dlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SHASHKIMFCV2_DIALOG, pParent)
 	, count(0)
+	, IdTrain(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -65,14 +66,18 @@ void Cshashkimfcv2Dlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1, Color);
 	DDX_Text(pDX, IDC_EDIT1, count);
+	DDX_Text(pDX, IDC_EDIT2, IdTrain);
 }
 
 BEGIN_MESSAGE_MAP(Cshashkimfcv2Dlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
+	ON_WM_TIMER()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDOK, &Cshashkimfcv2Dlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDOK2, &Cshashkimfcv2Dlg::OnBnClickedOk2)
+	ON_EN_CHANGE(IDC_EDIT1, &Cshashkimfcv2Dlg::OnEnChangeEdit1)
+	ON_BN_CLICKED(IDCANCEL, &Cshashkimfcv2Dlg::OnBnClickedCancel)
 END_MESSAGE_MAP()
 
 
@@ -199,11 +204,55 @@ void Cshashkimfcv2Dlg::OnBnClickedOk()
 void Cshashkimfcv2Dlg::OnBnClickedOk2()
 {
 	MessageBox(L"Тренеровка начата!");
+	//timer = SetTimer(1, 10, 0);
 
 	UpdateData();
-	for (int i = 0; i < count; i++) {		
+	for (int i = 0; i < count; i++) {
+		IdTrain = i;
+		UpdateData(false);
+
+
+		while (PeekMessage(&mes, 0, NULL, NULL, PM_REMOVE))
+		{
+			TranslateMessage(&mes);
+			DispatchMessage(&mes);
+		}
 		p->Selection();
 		p->CreateNew();
 	}
-	MessageBox(L"Тренеровка завершена!");	
+	MessageBox(L"Тренеровка завершена!");
+	//KillTimer(timer);
+}
+
+
+void Cshashkimfcv2Dlg::OnEnChangeEdit1()
+{
+	// TODO:  Если это элемент управления RICHEDIT, то элемент управления не будет
+	// send this notification unless you override the CDialogEx::OnInitDialog()
+	// функция и вызов CRichEditCtrl().SetEventMask()
+	// with the ENM_CHANGE flag ORed into the mask.
+
+	// TODO:  Добавьте код элемента управления
+}
+
+
+void Cshashkimfcv2Dlg::OnBnClickedCancel()
+{
+	// TODO: добавьте свой код обработчика уведомлений
+	CDialogEx::OnCancel();
+}
+
+//timer
+void Cshashkimfcv2Dlg::OnTimer(UINT_PTR nIDEvent)
+{
+	UpdateData(false);
+	
+
+	while (PeekMessage(&mes, 0, NULL, NULL, PM_REMOVE))
+	{
+		TranslateMessage(&mes);
+		DispatchMessage(&mes);
+	}
+
+	CDialogEx::OnTimer(nIDEvent);
 }

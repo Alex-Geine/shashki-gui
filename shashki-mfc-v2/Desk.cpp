@@ -249,6 +249,8 @@ void Desk::OnLButtonUp(UINT nFlags, CPoint point)
 		//проверка на дамку
 		if (abs(Board[col][line]) == 2)
 			king = true;
+		else
+			king = false;
 
 		Click = true;
 	}
@@ -312,7 +314,7 @@ void Desk::HumanHungry() {
 	}
 	else if ((dcol < 0) && (dline < 0) && human == Role::Black) {
 		//MessageBox(L"Right-back");
-		d = Direction::LeftForward;
+		d = Direction::RightForward;
 	}
 	else if ((dcol > 0) && (dline < 0) && human == Role::Black) {
 		//MessageBox(L"Left-back");
@@ -331,7 +333,8 @@ void Desk::HumanHungry() {
 
 	//ход за противника
 	//board = playAutomatic(board);
-	board = playNeiron(board, neiro);
+	if(board.color() != human)
+		board = playNeiron(board, neiro);
 }
 
 //ход игрока, когда не надо есть
@@ -365,15 +368,18 @@ void Desk::HumanQuiet() {
 		//MessageBox(L"Left");
 		d = Direction::LeftForward;
 	}
-
 	//выбор нарпавления для белых 
-	if ((dcol < 0) && (dline > 0) && human == Role::Black) {
+	else if ((dcol < 0) && (dline > 0) && human == Role::Black) {
 		//MessageBox(L"Right");
 		d = Direction::RightBackward;
 	}
 	else if ((dcol > 0) && (dline > 0) && human == Role::Black) {
 		//MessageBox(L"Left");
 		d = Direction::LeftBackward;
+	}
+	else {
+		//MessageBox(L"Хуйня!");
+		return;
 	}
 
 	//сам ход
@@ -382,7 +388,7 @@ void Desk::HumanQuiet() {
 	board.control(Cell());	//эта штука хз что делает
 
 	//ход за противника
-	//board = playAutomatic(board);
+	//board = playAutomatic(board);	
 	board = playNeiron(board, neiro);
 }
 
@@ -399,14 +405,21 @@ void Desk::HumanQuietKing() {
 	if ((dcol < 0) && (dline < 0) && human == Role::White) {
 		//MessageBox(L"Right");
 		d = Direction::RightForward;
-
 	}
 	else if ((dcol > 0) && (dline < 0) && human == Role::White) {
 		//MessageBox(L"Left");
 		d = Direction::LeftForward;
 	}
+	else if ((dcol > 0) && (dline > 0) && human == Role::White) {
+		//MessageBox(L"Left-Back");
+		d = Direction::LeftBackward;
+	}
+	else if ((dcol < 0) && (dline > 0) && human == Role::White) {
+		//MessageBox(L"Right-Back");
+		d = Direction::RightBackward;
+	}
 
-	//выбор нарпавления для белых 
+	//выбор нарпавления для черных
 	if ((dcol < 0) && (dline > 0) && human == Role::Black) {
 		//MessageBox(L"Right");
 		d = Direction::RightBackward;
@@ -415,10 +428,23 @@ void Desk::HumanQuietKing() {
 		//MessageBox(L"Left");
 		d = Direction::LeftBackward;
 	}
+	else if ((dcol < 0) && (dline < 0) && human == Role::Black) {
+		//MessageBox(L"Right-back");
+		d = Direction::RightForward;
+	}
+	else if ((dcol > 0) && (dline < 0) && human == Role::Black) {
+		//MessageBox(L"Left-back");
+		d = Direction::LeftForward;
+	}
 
 	//сам ход
 	board.control(curCell);
+
+	if (dline < 0)
+		dline *= -1;
+
 	while (dline) {//в этом цикле ходит по одной клетке пока не дойдет
+		//MessageBox(L"cell");
 		board.control(board.place().neighbour(d));
 		dline--;
 	}
@@ -480,7 +506,7 @@ void Desk::HumanHungryKing() {
 	}
 	else if ((dcol < 0) && (dline < 0) && human == Role::Black) {
 		//MessageBox(L"Right-back");
-		d = Direction::LeftForward;
+		d = Direction::RightForward;
 	}
 	else if ((dcol > 0) && (dline < 0) && human == Role::Black) {
 		//MessageBox(L"Left-back");
@@ -489,12 +515,18 @@ void Desk::HumanHungryKing() {
 	//сам ход
 	board.control(curCell);
 	board.control(board.place().neighbour(d));
+	//MessageBox(L"cell");
 
 	while (!board.capture())	//посмотри, что делает
 		board.control(board.place().neighbour(d));
+
+	if (dline < 0)
+		dline *= -1;
+
 	dline--;
 
 	while (dline) {//в этом цикле ходит по одной клетке пока не дойдет
+		//MessageBox(L"cell");
 		board.control(board.place().neighbour(d));
 		dline--;
 	}
@@ -503,5 +535,6 @@ void Desk::HumanHungryKing() {
 
 	//ход за противника
 	//board = playAutomatic(board);
-	board = playNeiron(board, neiro);
+	if (board.color() != human)
+		board = playNeiron(board, neiro);
 }

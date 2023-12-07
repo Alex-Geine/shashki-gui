@@ -34,10 +34,16 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
+	MSG mes;
+	UINT_PTR timer;
 	Desk* desk;
 	afx_msg void OnBnClickedOk();
 	CComboBox Color;
 	Population* p;
 	double count;
 	afx_msg void OnBnClickedOk2();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnEnChangeEdit1();
+	afx_msg void OnBnClickedCancel();
+	int IdTrain;
 };

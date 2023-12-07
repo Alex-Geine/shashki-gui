@@ -219,7 +219,8 @@ BoardState playAutomatic(BoardState initial) {
 }
 
 BoardState playNeiron(BoardState initial, Neiron* neiro) {
-
+	if (initial.lost() || !initial.finished())
+		return BoardState();
 	//DEBUG
 	//if(initial.color() == Role::White)
 	//	cout << "step white ";
